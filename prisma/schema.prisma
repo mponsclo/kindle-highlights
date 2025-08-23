@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Book {
+  id        String   @id @default(cuid())
+  title     String
+  author    String
+  createdAt DateTime @default(now())
+
+  highlights Highlight[]
+
+  @@map("books")
+}
+
+model Highlight {
+  id        String   @id @default(cuid())
+  content   String
+  page      Int?
+  location  String?
+  dateAdded DateTime?
+  bookId    String
+  createdAt DateTime @default(now())
+
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  tags HighlightTag[]
+
+  @@map("highlights")
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  color     String   @default("#3B82F6")
+  createdAt DateTime @default(now())
+
+  highlights HighlightTag[]
+
+  @@map("tags")
+}
+
+model HighlightTag {
+  highlightId String
+  tagId       String
+
+  highlight Highlight @relation(fields: [highlightId], references: [id], onDelete: Cascade)
+  tag       Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([highlightId, tagId])
+  @@map("highlight_tags")
+}
