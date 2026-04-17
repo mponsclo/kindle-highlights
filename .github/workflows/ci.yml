@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main, pre-prod]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      # Required by src/lib/env.ts at import time (Prisma client is imported
+      # by type-checking routes). A dummy value is sufficient for lint/type/build/test.
+      DATABASE_URL: postgres://user:pass@localhost:5432/dummy
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
