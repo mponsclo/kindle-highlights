@@ -1,6 +1,6 @@
 import { AppError } from './utils'
 
-export interface ValidationRule<T = any> {
+export interface ValidationRule<T = unknown> {
   required?: boolean
   minLength?: number
   maxLength?: number
@@ -16,8 +16,8 @@ export interface FileValidationOptions {
 
 export class Validator {
   static validateString(
-    value: any, 
-    fieldName: string, 
+    value: unknown,
+    fieldName: string,
     rules: ValidationRule<string> = {}
   ): string {
     if (rules.required && (!value || typeof value !== 'string' || value.trim() === '')) {
@@ -109,7 +109,7 @@ export class Validator {
       .replace(/\//g, '&#x2F;')
   }
   
-  static validateId(id: any, fieldName: string = 'ID'): string {
+  static validateId(id: unknown, fieldName: string = 'ID'): string {
     if (!id || typeof id !== 'string') {
       throw new AppError(`${fieldName} is required and must be a string`, 'VALIDATION_ERROR', 400)
     }

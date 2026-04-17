@@ -50,8 +50,8 @@ export default function TagManager({
             style={{
               backgroundColor: `${tag.color}20`,
               color: tag.color,
-              ringColor: selectedTags.includes(tag.id) ? tag.color : 'transparent',
-            }}
+              ['--tw-ring-color' as string]: selectedTags.includes(tag.id) ? tag.color : 'transparent',
+            } as React.CSSProperties}
           >
             {tag.name}
             {selectedTags.includes(tag.id) && (

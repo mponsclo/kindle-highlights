@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { Validator } from '@/lib/validation'
 import { AppError, handleApiError } from '@/lib/utils'
@@ -9,14 +10,14 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search') || ''
     const bookId = searchParams.get('bookId')
     const includeAllHighlights = searchParams.get('includeAll') === 'true'
-    
+
     // Validate pagination parameters
     const { page, limit } = Validator.validatePagination(
       searchParams.get('page'),
       searchParams.get('limit')
     )
 
-    const where: any = {}
+    const where: Prisma.BookWhereInput = {}
 
     if (search) {
       where.OR = [

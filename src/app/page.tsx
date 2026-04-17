@@ -133,7 +133,7 @@ export default function Home() {
                 2
               </div>
               <p className="text-gray-700 dark:text-gray-300">
-                Navigate to the Kindle drive and open the "documents" folder
+                Navigate to the Kindle drive and open the &quot;documents&quot; folder
               </p>
             </div>
             <div className="text-center">
@@ -141,7 +141,7 @@ export default function Home() {
                 3
               </div>
               <p className="text-gray-700 dark:text-gray-300">
-                Find "My Clippings.txt" and upload it using the form above
+                Find &quot;My Clippings.txt&quot; and upload it using the form above
               </p>
             </div>
           </div>

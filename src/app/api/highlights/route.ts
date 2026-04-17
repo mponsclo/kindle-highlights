@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
+import { Validator } from '@/lib/validation'
+import { AppError, handleApiError } from '@/lib/utils'
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,7 +12,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50')
     const offset = parseInt(searchParams.get('offset') || '0')
 
-    const where: any = {}
+    const where: Prisma.HighlightWhereInput = {}
 
     if (search) {
       where.OR = [
@@ -42,14 +45,24 @@ export async function GET(request: NextRequest) {
     ])
 
     return NextResponse.json({
+      success: true,
       highlights,
       total,
       hasMore: offset + limit < total,
     })
   } catch (error) {
-    console.error('Error fetching highlights:', error)
+    console.error('Highlights API error:', error)
+
+    if (error instanceof AppError) {
+      return NextResponse.json(
+        { error: error.message, code: error.code, success: false },
+        { status: error.statusCode }
+      )
+    }
+
+    const { message, code } = handleApiError(error)
     return NextResponse.json(
-      { error: 'Failed to fetch highlights' },
+      { error: message, code, success: false },
       { status: 500 }
     )
   }
@@ -60,19 +73,26 @@ export async function DELETE(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
 
-    if (!id) {
-      return NextResponse.json({ error: 'Highlight ID is required' }, { status: 400 })
-    }
+    Validator.validateId(id, 'Highlight ID')
 
     await prisma.highlight.delete({
-      where: { id },
+      where: { id: id! },
     })
 
-    return NextResponse.json({ message: 'Highlight deleted successfully' })
+    return NextResponse.json({ success: true, message: 'Highlight deleted successfully' })
   } catch (error) {
-    console.error('Error deleting highlight:', error)
+    console.error('Highlights DELETE error:', error)
+
+    if (error instanceof AppError) {
+      return NextResponse.json(
+        { error: error.message, code: error.code, success: false },
+        { status: error.statusCode }
+      )
+    }
+
+    const { message, code } = handleApiError(error)
     return NextResponse.json(
-      { error: 'Failed to delete highlight' },
+      { error: message, code, success: false },
       { status: 500 }
     )
   }

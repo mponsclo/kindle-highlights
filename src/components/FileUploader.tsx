@@ -7,10 +7,32 @@ interface FileUploaderProps {
   onUploadSuccess?: () => void
 }
 
+interface UploadStats {
+  totalHighlights: number
+  newBooks: number
+  existingBooks: number
+  skippedHighlights: number
+  totalBooks: number
+}
+
+interface UploadSuccess {
+  success: true
+  message: string
+  stats: UploadStats
+}
+
+interface UploadFailure {
+  success?: false
+  error: string
+  code?: string
+}
+
+type UploadResult = UploadSuccess | UploadFailure
+
 export default function FileUploader({ onUploadSuccess }: FileUploaderProps) {
   const [uploading, setUploading] = useState(false)
   const [dragOver, setDragOver] = useState(false)
-  const [result, setResult] = useState<any>(null)
+  const [result, setResult] = useState<UploadResult | null>(null)
 
   const handleFileUpload = async (file: File) => {
     // Client-side validation
@@ -144,7 +166,7 @@ export default function FileUploader({ onUploadSuccess }: FileUploaderProps) {
 
       {result && (
         <div className="mt-6 animate-in fade-in duration-300">
-          {result.error ? (
+          {'error' in result ? (
             <div className="flex items-start space-x-3 text-red-700 dark:text-red-400 bg-red-50/80 dark:bg-red-950/30 backdrop-blur-sm border border-red-200 dark:border-red-800/50 p-4 rounded-2xl">
               <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
               <div>

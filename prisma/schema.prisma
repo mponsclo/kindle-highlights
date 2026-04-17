@@ -21,6 +21,8 @@ model Book {
 
   highlights Highlight[]
 
+  @@index([title])
+  @@index([author])
   @@map("books")
 }
 
@@ -36,6 +38,8 @@ model Highlight {
   book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
   tags HighlightTag[]
 
+  @@unique([bookId, content])
+  @@index([bookId])
   @@map("highlights")
 }
 

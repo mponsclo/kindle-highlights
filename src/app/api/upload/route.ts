@@ -53,13 +53,13 @@ export async function POST(request: NextRequest) {
 
       for (const parsedBook of parsedBooks) {
         // Validate book data
-        const title = Validator.validateString(parsedBook.title, 'Book title', { 
-          required: true, 
-          maxLength: 500 
+        const title = Validator.validateString(parsedBook.title, 'Book title', {
+          required: true,
+          maxLength: 500
         })
-        const author = Validator.validateString(parsedBook.author, 'Book author', { 
-          required: true, 
-          maxLength: 200 
+        const author = Validator.validateString(parsedBook.author, 'Book author', {
+          required: true,
+          maxLength: 200
         })
 
         // Find or create book using normalized matching
@@ -76,10 +76,10 @@ export async function POST(request: NextRequest) {
           const allBooks = await tx.book.findMany({
             where: { author }
           })
-          
+
           const normalizedNewTitle = normalizeForMatching(title)
           book = allBooks.find(b => normalizeForMatching(b.title) === normalizedNewTitle) || null
-          
+
           // If we found a match with different formatting, update it to the new format
           if (book && book.title !== title) {
             book = await tx.book.update({
@@ -98,36 +98,34 @@ export async function POST(request: NextRequest) {
           existingBooks++
         }
 
-        // Process highlights
+        // Validate highlights, dedupe within the batch, then bulk-insert.
+        // Relies on the @@unique([bookId, content]) constraint + skipDuplicates
+        // to safely drop both intra-file and prior-upload duplicates.
+        const seen = new Set<string>()
+        const rows = []
         for (const highlight of parsedBook.highlights) {
-          // Validate highlight content
           const content = Validator.validateString(highlight.content, 'Highlight content', {
             required: true,
             maxLength: 5000
           })
-
-          // Check if highlight already exists
-          const existingHighlight = await tx.highlight.findFirst({
-            where: {
-              bookId: book.id,
-              content,
-            },
+          if (seen.has(content)) continue
+          seen.add(content)
+          rows.push({
+            content,
+            page: highlight.page || null,
+            location: highlight.location || null,
+            dateAdded: highlight.dateAdded || null,
+            bookId: book.id,
           })
+        }
 
-          if (!existingHighlight) {
-            await tx.highlight.create({
-              data: {
-                content,
-                page: highlight.page || null,
-                location: highlight.location || null,
-                dateAdded: highlight.dateAdded || null,
-                bookId: book.id,
-              },
-            })
-            totalHighlights++
-          } else {
-            skippedHighlights++
-          }
+        if (rows.length > 0) {
+          const { count } = await tx.highlight.createMany({
+            data: rows,
+            skipDuplicates: true,
+          })
+          totalHighlights += count
+          skippedHighlights += rows.length - count
         }
       }
 

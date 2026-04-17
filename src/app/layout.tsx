@@ -64,9 +64,9 @@ export default function RootLayout({
         <SkipToContent />
         <ErrorBoundary>
           <ThemeProvider>
-            <div id="__next">
+            <main id="main-content">
               {children}
-            </div>
+            </main>
           </ThemeProvider>
         </ErrorBoundary>
       </body>

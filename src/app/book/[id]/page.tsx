@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
-import { BookWithHighlights } from '@/lib/types'
+import { BookWithHighlights, Highlight } from '@/lib/types'
 import HighlightCard from '@/components/HighlightCard'
 import SearchBar from '@/components/SearchBar'
 import ThemeToggle from '@/components/ThemeToggle'
@@ -16,7 +16,7 @@ export default function BookDetailsPage({ params }: PageProps) {
   const router = useRouter()
   const resolvedParams = use(params)
   const [book, setBook] = useState<BookWithHighlights | null>(null)
-  const [filteredHighlights, setFilteredHighlights] = useState<any[]>([])
+  const [filteredHighlights, setFilteredHighlights] = useState<Highlight[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
 

@@ -56,8 +56,8 @@ function extractBookInfo(titleLine: string): { title: string; author: string } |
   const match = titleLine.match(/^(.+?)\s*\(([^)]+)\)\s*$/)
   
   if (match) {
-    let rawTitle = match[1].trim()
-    let rawAuthor = match[2].trim()
+    const rawTitle = match[1].trim()
+    const rawAuthor = match[2].trim()
     
     // Clean the title: remove parentheses content and extra info
     let title = rawTitle
