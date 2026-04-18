@@ -124,13 +124,27 @@ describe('parseKindleClippings', () => {
     expect(parseKindleClippings(input)).toEqual([])
   })
 
-  it('skips sections whose title does not match "Title (Author)" shape', () => {
+  it('keeps books without a trailing "(Author)" and tags them Unknown', () => {
     const input = section(
-      'No parentheses here at all',
+      'The 4-Hour Body  ',
       '- Your Highlight on page 1 | location 10-12 | Added on Monday, 1 January 2024 10:00:00',
       'body',
     )
-    expect(parseKindleClippings(input)).toEqual([])
+    const result = parseKindleClippings(input)
+    expect(result).toHaveLength(1)
+    expect(result[0].title).toBe('The 4-Hour Body')
+    expect(result[0].author).toBe('Unknown')
+  })
+
+  it('strips a leading BOM (U+FEFF) from title lines', () => {
+    const input = section(
+      '\uFEFFThe 4-Hour Body',
+      '- Your Highlight on page 1 | location 10-12 | Added on Monday, 1 January 2024 10:00:00',
+      'body',
+    )
+    const result = parseKindleClippings(input)
+    expect(result).toHaveLength(1)
+    expect(result[0].title).toBe('The 4-Hour Body')
   })
 
   it('leaves page and location undefined when metadata lacks them', () => {

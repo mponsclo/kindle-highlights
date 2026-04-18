@@ -7,7 +7,7 @@ import { useDebounce } from '@/lib/hooks'
 import HighlightCard from '@/components/HighlightCard'
 import SearchBar from '@/components/SearchBar'
 import ThemeToggle from '@/components/ThemeToggle'
-import { ArrowLeft, Quote, User, Calendar, Search } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 
 const PAGE_SIZE = 50
 
@@ -23,25 +23,6 @@ interface BookDetailClientProps {
   book: BookMeta
 }
 
-const COVER_COLORS = [
-  'from-blue-500 to-blue-600',
-  'from-green-500 to-green-600',
-  'from-purple-500 to-purple-600',
-  'from-red-500 to-red-600',
-  'from-indigo-500 to-indigo-600',
-  'from-pink-500 to-pink-600',
-  'from-yellow-500 to-yellow-600',
-  'from-teal-500 to-teal-600',
-]
-
-function getBookColor(title: string): string {
-  let hash = 0
-  for (let i = 0; i < title.length; i++) {
-    hash = title.charCodeAt(i) + ((hash << 5) - hash)
-  }
-  return COVER_COLORS[Math.abs(hash) % COVER_COLORS.length]
-}
-
 export default function BookDetailClient({ book }: BookDetailClientProps) {
   const [highlights, setHighlights] = useState<Highlight[]>([])
   const [total, setTotal] = useState(book.highlightCount)
@@ -54,11 +35,8 @@ export default function BookDetailClient({ book }: BookDetailClientProps) {
 
   const fetchPage = useCallback(
     async (nextOffset: number, q: string, append: boolean) => {
-      if (append) {
-        setLoadingMore(true)
-      } else {
-        setLoading(true)
-      }
+      if (append) setLoadingMore(true)
+      else setLoading(true)
       try {
         const params = new URLSearchParams({
           bookId: book.id,
@@ -85,7 +63,6 @@ export default function BookDetailClient({ book }: BookDetailClientProps) {
     [book.id],
   )
 
-  // Refetch from offset 0 whenever the debounced search query changes.
   useEffect(() => {
     fetchPage(0, searchQuery.trim(), false)
   }, [searchQuery, fetchPage])
@@ -95,92 +72,72 @@ export default function BookDetailClient({ book }: BookDetailClientProps) {
     fetchPage(offset, searchQuery.trim(), true)
   }
 
+  const year = new Date(book.createdAt).getFullYear()
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
-      <div className="absolute top-6 right-6">
-        <ThemeToggle />
-      </div>
-
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="mb-8">
+    <div className="min-h-screen">
+      <header className="border-b border-[color:var(--border)]">
+        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
           <Link
-            href="/dashboard"
-            className="inline-flex items-center space-x-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 mb-6 transition-colors"
+            href="/"
+            className="text-xs font-mono uppercase tracking-widest text-[color:var(--fg)]"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back to Library</span>
+            Kindle Highlights
           </Link>
-
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6 mb-8">
-            <div className="flex items-start space-x-6">
-              <div
-                className={`w-32 h-48 rounded-lg bg-gradient-to-br ${getBookColor(book.title)} shadow-lg flex-shrink-0 border-2 border-white dark:border-gray-200 relative overflow-hidden`}
-              >
-                <div className="absolute left-0 top-0 bottom-0 w-3 bg-black bg-opacity-20" />
-                <div className="p-4 h-full flex flex-col text-white">
-                  <h3 className="font-bold text-sm leading-tight line-clamp-4">
-                    {book.title}
-                  </h3>
-                </div>
-                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/0 via-white/5 to-white/0" />
-              </div>
-
-              <div className="flex-1">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                  {book.title}
-                </h1>
-                <div className="flex items-center text-gray-600 dark:text-gray-300 mb-4">
-                  <User className="w-4 h-4 mr-2" />
-                  <span className="text-lg">by {book.author}</span>
-                </div>
-
-                <div className="flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400 mb-4">
-                  <div className="flex items-center">
-                    <Quote className="w-4 h-4 mr-1" />
-                    <span>{book.highlightCount} highlights</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Calendar className="w-4 h-4 mr-1" />
-                    <span>Added {new Date(book.createdAt).toLocaleDateString()}</span>
-                  </div>
-                </div>
-
-                <div className="max-w-md">
-                  <SearchBar
-                    onSearch={setSearchInput}
-                    placeholder="Search within this book..."
-                  />
-                </div>
-              </div>
-            </div>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-widest text-[color:var(--muted)] hover:text-[color:var(--fg)] transition-colors"
+            >
+              <ArrowLeft className="w-3 h-3" strokeWidth={1.5} />
+              Library
+            </Link>
+            <ThemeToggle />
           </div>
         </div>
+      </header>
 
-        <div className="space-y-4">
-          {searchQuery.trim() && !loading && (
-            <div className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-              Found {total} of {book.highlightCount} highlights
-            </div>
-          )}
+      <div className="max-w-2xl mx-auto px-6 py-16">
+        {/* Book header */}
+        <header className="mb-12">
+          <p className="text-[10px] font-mono uppercase tracking-widest text-[color:var(--muted)] nums-tabular">
+            {String(book.highlightCount).padStart(3, '0')} highlights · added {year}
+          </p>
+          <h1 className="mt-4 text-4xl md:text-5xl font-semibold leading-[1.1] tracking-tight text-[color:var(--fg)]">
+            {book.title}
+          </h1>
+          <p className="mt-3 text-lg text-[color:var(--muted)]">by {book.author}</p>
 
-          {loading ? (
-            <div className="flex justify-center py-12">
-              <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full" />
-            </div>
-          ) : highlights.length === 0 ? (
-            <div className="text-center py-12">
-              <Search className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                {searchQuery ? 'No matching highlights' : 'No highlights found'}
-              </h3>
-              <p className="text-gray-500 dark:text-gray-400">
-                {searchQuery
-                  ? 'Try adjusting your search terms'
-                  : "This book doesn't have any highlights yet"}
+          <div className="mt-8">
+            <SearchBar
+              onSearch={setSearchInput}
+              placeholder="Search within this book"
+            />
+            {searchQuery.trim() && !loading && (
+              <p className="mt-3 text-[10px] font-mono uppercase tracking-widest text-[color:var(--muted)] nums-tabular">
+                {total} of {book.highlightCount} match “{searchQuery.trim()}”
               </p>
-            </div>
-          ) : (
-            <>
+            )}
+          </div>
+        </header>
+
+        {/* Highlights list */}
+        {loading ? (
+          <div className="py-20 flex justify-center">
+            <div className="w-6 h-6 border border-[color:var(--border-strong)] border-t-[color:var(--accent-strong)] rounded-full animate-spin" />
+          </div>
+        ) : highlights.length === 0 ? (
+          <div className="border-t border-[color:var(--border)] py-20 text-center">
+            <p className="text-[10px] font-mono uppercase tracking-widest text-[color:var(--muted)]">
+              Nothing to show
+            </p>
+            <p className="mt-3 text-lg text-[color:var(--fg)]">
+              {searchQuery ? 'No highlights match.' : 'This book has no highlights yet.'}
+            </p>
+          </div>
+        ) : (
+          <>
+            <div>
               {highlights.map((highlight) => (
                 <HighlightCard
                   key={highlight.id}
@@ -188,21 +145,30 @@ export default function BookDetailClient({ book }: BookDetailClientProps) {
                   showBookInfo={false}
                 />
               ))}
+            </div>
 
-              {hasMore && (
-                <div className="flex justify-center pt-6">
-                  <button
-                    onClick={loadMore}
-                    disabled={loadingMore}
-                    className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium shadow-sm transition-colors"
-                  >
-                    {loadingMore ? 'Loading…' : `Load more (${total - highlights.length} remaining)`}
-                  </button>
-                </div>
-              )}
-            </>
-          )}
-        </div>
+            {hasMore && (
+              <div className="mt-10 border-t border-[color:var(--border)] pt-10 flex justify-center">
+                <button
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  className="inline-flex items-center gap-3 border border-[color:var(--border-strong)] px-5 py-3 text-sm text-[color:var(--fg)] hover:bg-[color:var(--surface)] hover:border-[color:var(--fg)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {loadingMore ? (
+                    'Loading…'
+                  ) : (
+                    <>
+                      Load more
+                      <span className="text-[10px] font-mono uppercase tracking-widest text-[color:var(--muted)] nums-tabular">
+                        {total - highlights.length} left
+                      </span>
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   )

@@ -53,48 +53,46 @@ export function parseKindleClippings(content: string): ParsedBook[] {
 }
 
 function extractBookInfo(titleLine: string): { title: string; author: string } | null {
-  const match = titleLine.match(/^(.+?)\s*\(([^)]+)\)\s*$/)
-  
+  // Strip leading BOM/ZWNBSP (\uFEFF) that Kindle sometimes prepends to sections
+  // and trim trailing whitespace (some exports pad titles with spaces).
+  const cleaned = titleLine.replace(/^\uFEFF+/, '').trim()
+  if (!cleaned) return null
+
+  const match = cleaned.match(/^(.+?)\s*\(([^)]+)\)\s*$/)
+
   if (match) {
     const rawTitle = match[1].trim()
     const rawAuthor = match[2].trim()
-    
-    // Clean the title: remove parentheses content and extra info
+
     let title = rawTitle
-    
-    // Remove ALL parentheses content from the title (like Spanish Edition, etc.)
     title = title.replace(/\s*\([^)]*\)\s*/g, '').trim()
-    
-    // Replace underscores with colons for better readability
     title = title.replace(/_/g, ':')
-    
+
     // Handle cases where author info is duplicated in title
     // Example: "Outlive - Peter Attia, MD" should become just "Outlive"
     const dashMatch = title.match(/^(.+?)\s*[-–—]\s*(.+)$/)
     if (dashMatch) {
       const potentialTitle = dashMatch[1].trim()
       const potentialAuthor = dashMatch[2].trim()
-      
-      // Check if the part after dash matches the author (case-insensitive)
-      if (potentialAuthor.toLowerCase().includes(rawAuthor.toLowerCase().split(',')[0]) || 
+      if (potentialAuthor.toLowerCase().includes(rawAuthor.toLowerCase().split(',')[0]) ||
           rawAuthor.toLowerCase().includes(potentialAuthor.toLowerCase().split(',')[0])) {
         title = potentialTitle
       }
     }
-    
-    // Clean the author: keep only the main name, remove extra titles/info in some cases
+
     let author = rawAuthor
-    
-    // Handle cases where there might be additional info in parentheses in author
     author = author.replace(/\s*\([^)]*\)\s*$/, '').trim()
-    
-    return { 
-      title: title || rawTitle, // Fallback to rawTitle if cleaning resulted in empty
-      author: author || rawAuthor // Fallback to rawAuthor if cleaning resulted in empty
+
+    return {
+      title: title || rawTitle,
+      author: author || rawAuthor,
     }
   }
 
-  return null
+  // No "(Author)" suffix — common for Kindle store exports where the author
+  // wasn't embedded in the title line. Keep the book rather than dropping all
+  // its highlights.
+  return { title: cleaned.replace(/_/g, ':'), author: 'Unknown' }
 }
 
 function parseHighlightFromMetadata(metadataLine: string, contentLine: string): ParsedHighlight | null {

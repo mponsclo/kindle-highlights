@@ -1,29 +1,27 @@
 export default function BookDetailLoading() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="h-5 w-32 rounded bg-gray-200 dark:bg-slate-700 animate-pulse mb-6" />
+    <div className="min-h-screen">
+      <div className="max-w-2xl mx-auto px-6 py-16">
+        <div className="h-3 w-24 bg-[color:var(--border)] animate-pulse mb-8" />
 
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6 mb-8">
-          <div className="flex items-start space-x-6">
-            <div className="w-32 h-48 rounded-lg bg-gray-200 dark:bg-slate-700 animate-pulse flex-shrink-0" />
-            <div className="flex-1 space-y-4">
-              <div className="h-9 w-3/4 rounded bg-gray-200 dark:bg-slate-700 animate-pulse" />
-              <div className="h-5 w-1/2 rounded bg-gray-200 dark:bg-slate-700 animate-pulse" />
-              <div className="h-4 w-1/3 rounded bg-gray-200 dark:bg-slate-700 animate-pulse" />
-              <div className="h-10 max-w-md rounded-lg bg-gray-200 dark:bg-slate-700 animate-pulse" />
-            </div>
+        <div className="h-3 w-20 bg-[color:var(--border)] animate-pulse mb-4" />
+        <div className="h-10 w-4/5 bg-[color:var(--border)] animate-pulse mb-3" />
+        <div className="h-5 w-2/5 bg-[color:var(--border)] animate-pulse mb-6" />
+        <div className="flex gap-4 mb-10">
+          <div className="h-3 w-24 bg-[color:var(--border)] animate-pulse" />
+          <div className="h-3 w-28 bg-[color:var(--border)] animate-pulse" />
+        </div>
+        <div className="h-10 w-full bg-[color:var(--border)] animate-pulse mb-12" />
+
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="border-t border-[color:var(--border)] py-6 space-y-3">
+            <div className="h-3 w-40 bg-[color:var(--border)] animate-pulse" />
+            <div className="h-5 w-full bg-[color:var(--border)] animate-pulse" />
+            <div className="h-5 w-11/12 bg-[color:var(--border)] animate-pulse" />
+            <div className="h-5 w-3/4 bg-[color:var(--border)] animate-pulse" />
+            <div className="h-3 w-28 bg-[color:var(--border)] animate-pulse" />
           </div>
-        </div>
-
-        <div className="space-y-4">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-24 rounded-xl bg-gray-200 dark:bg-slate-700 animate-pulse"
-            />
-          ))}
-        </div>
+        ))}
       </div>
     </div>
   )

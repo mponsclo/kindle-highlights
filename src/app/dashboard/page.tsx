@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client'
-import { BookOpen, Library, Quote } from 'lucide-react'
+import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import BookCard from '@/components/BookCard'
 import ThemeToggle from '@/components/ThemeToggle'
@@ -32,7 +32,7 @@ export default async function Dashboard({ searchParams }: PageProps) {
   const books = await prisma.book.findMany({
     where,
     include: { _count: { select: { highlights: true } } },
-    orderBy: { createdAt: 'desc' },
+    orderBy: [{ highlights: { _count: 'desc' } }, { createdAt: 'desc' }],
   })
 
   const deepReads = books.filter((b) => b._count.highlights > DEEP_READ_THRESHOLD)
@@ -41,109 +41,143 @@ export default async function Dashboard({ searchParams }: PageProps) {
   const hasResults = books.length > 0
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
-      <div className="absolute top-6 right-6">
-        <ThemeToggle />
-      </div>
+    <div className="min-h-screen">
+      <header className="border-b border-[color:var(--border)]">
+        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+          <Link
+            href="/"
+            className="text-xs font-mono uppercase tracking-widest text-[color:var(--fg)]"
+          >
+            Kindle Highlights
+          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              className="text-xs font-mono uppercase tracking-widest text-[color:var(--muted)] hover:text-[color:var(--fg)] transition-colors"
+            >
+              ← Home
+            </Link>
+            <ThemeToggle />
+          </div>
+        </div>
+      </header>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="mb-10">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 dark:from-white dark:via-blue-200 dark:to-indigo-200 bg-clip-text text-transparent mb-3">
-                My Library
-              </h1>
-
-              <div className="flex flex-wrap gap-6 text-gray-600 dark:text-gray-300">
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                    <Library className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="text-lg font-medium">{books.length} books</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center">
-                    <Quote className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="text-lg font-medium">{totalHighlights} highlights</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg flex items-center justify-center">
-                    <BookOpen className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="text-lg font-medium">{deepReads.length} deep reads</span>
-                </div>
-              </div>
-            </div>
+      <div className="max-w-6xl mx-auto px-6 py-16">
+        {/* Masthead */}
+        <section className="grid md:grid-cols-12 gap-6 md:gap-10 items-end mb-14">
+          <div className="md:col-span-7">
+            <p className="text-[10px] font-mono uppercase tracking-widest text-[color:var(--muted)]">
+              Your library
+            </p>
+            <h1 className="mt-3 text-5xl md:text-6xl font-semibold leading-[1.05] tracking-tight text-[color:var(--fg)]">
+              Everything you&apos;ve{' '}
+              <span className="highlighter">marked</span>.
+            </h1>
           </div>
 
+          <dl className="md:col-span-5 grid grid-cols-3 border-t border-[color:var(--fg)] nums-tabular">
+            <Stat label="Books" value={books.length} />
+            <Stat label="Highlights" value={totalHighlights} divider />
+            <Stat label="Deep reads" value={deepReads.length} divider />
+          </dl>
+        </section>
+
+        <div className="mb-14 max-w-md">
           <DashboardSearch />
+          {query && (
+            <p className="mt-3 text-[10px] font-mono uppercase tracking-widest text-[color:var(--muted)] nums-tabular">
+              {books.length} {books.length === 1 ? 'result' : 'results'} for “{query}”
+            </p>
+          )}
         </div>
 
         {!hasResults ? (
-          <div className="text-center py-12">
-            <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              {query ? 'No matches found' : 'No books yet'}
-            </h3>
-            <p className="text-gray-500 dark:text-gray-400">
-              {query
-                ? 'Try adjusting your search terms'
-                : 'Upload your Kindle clippings to get started'}
+          <div className="border-t border-[color:var(--border)] py-20 text-center">
+            <p className="text-[10px] font-mono uppercase tracking-widest text-[color:var(--muted)]">
+              Nothing here
+            </p>
+            <p className="mt-3 text-lg text-[color:var(--fg)]">
+              {query ? 'No books match your search.' : 'Your library is empty.'}
+            </p>
+            <p className="mt-2 text-sm text-[color:var(--muted)]">
+              {query ? 'Try a shorter query.' : 'Head home and upload your clippings file.'}
             </p>
           </div>
         ) : (
-          <div className="space-y-12">
+          <div className="space-y-20">
             {deepReads.length > 0 && (
-              <div>
-                <div className="flex items-center space-x-3 mb-6">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
-                    <Library className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                      Deep Reads
-                    </h2>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">
-                      Books with more than {DEEP_READ_THRESHOLD} highlights
-                    </p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              <Section
+                eyebrow={`Deep reads · ${deepReads.length}`}
+                subtitle={`Books with more than ${DEEP_READ_THRESHOLD} highlights`}
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-10">
                   {deepReads.map((book) => (
                     <BookCard key={book.id} book={book} href={`/book/${book.id}`} />
                   ))}
                 </div>
-              </div>
+              </Section>
             )}
 
             {lightReads.length > 0 && (
-              <div>
-                <div className="flex items-center space-x-3 mb-6">
-                  <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center">
-                    <BookOpen className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                      Light Reading
-                    </h2>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">
-                      Books with {DEEP_READ_THRESHOLD} or fewer highlights
-                    </p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+              <Section
+                eyebrow={`Light reading · ${lightReads.length}`}
+                subtitle={`Books with ${DEEP_READ_THRESHOLD} or fewer highlights`}
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-10">
                   {lightReads.map((book) => (
-                    <div key={book.id} className="transform scale-90">
-                      <BookCard book={book} href={`/book/${book.id}`} />
-                    </div>
+                    <BookCard key={book.id} book={book} href={`/book/${book.id}`} />
                   ))}
                 </div>
-              </div>
+              </Section>
             )}
           </div>
         )}
       </div>
     </div>
+  )
+}
+
+function Stat({
+  label,
+  value,
+  divider = false,
+}: {
+  label: string
+  value: number
+  divider?: boolean
+}) {
+  return (
+    <div
+      className={`px-4 py-4 ${divider ? 'border-l border-[color:var(--border)]' : ''}`}
+    >
+      <dt className="text-[10px] font-mono uppercase tracking-widest text-[color:var(--muted)]">
+        {label}
+      </dt>
+      <dd className="mt-1 text-2xl font-semibold text-[color:var(--fg)]">
+        {value.toLocaleString()}
+      </dd>
+    </div>
+  )
+}
+
+function Section({
+  eyebrow,
+  subtitle,
+  children,
+}: {
+  eyebrow: string
+  subtitle: string
+  children: React.ReactNode
+}) {
+  return (
+    <section>
+      <header className="mb-6">
+        <p className="text-[10px] font-mono uppercase tracking-widest text-[color:var(--muted)] nums-tabular">
+          {eyebrow}
+        </p>
+        <p className="mt-2 text-sm text-[color:var(--muted)]">{subtitle}</p>
+      </header>
+      {children}
+    </section>
   )
 }
