@@ -14,16 +14,17 @@ export async function GET(request: NextRequest) {
 
     const where: Prisma.HighlightWhereInput = {}
 
-    if (search) {
+    if (bookId) {
+      where.bookId = bookId
+      if (search) {
+        where.content = { contains: search, mode: 'insensitive' }
+      }
+    } else if (search) {
       where.OR = [
         { content: { contains: search, mode: 'insensitive' } },
         { book: { title: { contains: search, mode: 'insensitive' } } },
         { book: { author: { contains: search, mode: 'insensitive' } } },
       ]
-    }
-
-    if (bookId) {
-      where.bookId = bookId
     }
 
     const [highlights, total] = await Promise.all([
