@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Opt into class-based dark mode. Tailwind v4 defaults the `dark:`
+   variant to `prefers-color-scheme`; we toggle .dark on <html> from the
+   ThemeProvider, so the variant must target that class instead. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

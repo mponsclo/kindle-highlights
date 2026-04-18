@@ -84,10 +84,14 @@ export function handleApiError(error: unknown): { message: string; code: string 
   if (error instanceof AppError) {
     return { message: error.message, code: error.code }
   }
-  
+
+  // Non-AppError failures (Prisma connection errors, unhandled exceptions,
+  // etc.) must not leak their message to clients — it may include host names,
+  // stack frames, or other infra details.
   if (error instanceof Error) {
-    return { message: error.message, code: 'UNKNOWN_ERROR' }
+    console.error('Unhandled API error:', error)
+  } else {
+    console.error('Unhandled non-Error API throw:', error)
   }
-  
-  return { message: 'An unexpected error occurred', code: 'UNKNOWN_ERROR' }
+  return { message: 'An unexpected error occurred', code: 'INTERNAL_ERROR' }
 }

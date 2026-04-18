@@ -81,17 +81,22 @@ describe('handleApiError', () => {
     expect(handleApiError(err)).toEqual({ message: 'nope', code: 'NOT_FOUND' })
   })
 
-  it('maps generic Error to UNKNOWN_ERROR', () => {
-    expect(handleApiError(new Error('boom'))).toEqual({
-      message: 'boom',
-      code: 'UNKNOWN_ERROR',
+  it('does not leak generic Error messages (could expose infra details)', () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    expect(handleApiError(new Error('Can\'t reach database server at localhost:5432'))).toEqual({
+      message: 'An unexpected error occurred',
+      code: 'INTERNAL_ERROR',
     })
+    expect(spy).toHaveBeenCalled()
+    spy.mockRestore()
   })
 
   it('maps non-Error throws to a safe default', () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
     expect(handleApiError('oops')).toEqual({
       message: 'An unexpected error occurred',
-      code: 'UNKNOWN_ERROR',
+      code: 'INTERNAL_ERROR',
     })
+    spy.mockRestore()
   })
 })

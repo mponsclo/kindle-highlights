@@ -44,3 +44,7 @@ next-env.d.ts
 
 
 /clippings.txt
+
+# Playwright MCP artifacts + local smoke-test screenshots
+/.playwright-mcp/
+/*.png
