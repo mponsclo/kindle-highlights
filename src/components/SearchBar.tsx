@@ -9,15 +9,17 @@ interface SearchBarProps {
   onSearch: (query: string) => void
   className?: string
   debounceMs?: number
+  defaultValue?: string
 }
 
-export default function SearchBar({ 
-  placeholder = 'Search highlights, books, or authors...', 
+export default function SearchBar({
+  placeholder = 'Search highlights, books, or authors...',
   onSearch,
   className = '',
-  debounceMs = 300
+  debounceMs = 300,
+  defaultValue = ''
 }: SearchBarProps) {
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState(defaultValue)
   const debouncedQuery = useDebounce(query, debounceMs)
 
   // Call onSearch when debounced query changes

@@ -1,14 +1,13 @@
-'use client'
-
-import { BookWithHighlights } from '@/lib/types'
-import { BookOpen, Quote, User, Calendar } from 'lucide-react'
+import Link from 'next/link'
+import { Book } from '@/lib/types'
+import { Quote, Calendar } from 'lucide-react'
 
 interface BookCardProps {
-  book: BookWithHighlights
-  onClick: () => void
+  book: Book & { _count?: { highlights: number } }
+  href: string
 }
 
-export default function BookCard({ book, onClick }: BookCardProps) {
+export default function BookCard({ book, href }: BookCardProps) {
   const highlightCount = book._count?.highlights || 0
   
   // Generate a consistent color based on the book title
@@ -39,9 +38,9 @@ export default function BookCard({ book, onClick }: BookCardProps) {
   }
 
   return (
-    <div 
-      onClick={onClick}
-      className="group cursor-pointer transform transition-all duration-300 hover:scale-105"
+    <Link
+      href={href}
+      className="group block cursor-pointer transform transition-all duration-300 hover:scale-105"
     >
       {/* Book Cover */}
       <div className="relative">
@@ -101,6 +100,6 @@ export default function BookCard({ book, onClick }: BookCardProps) {
           <span>Added {formatDate(book.createdAt)}</span>
         </div>
       </div>
-    </div>
+    </Link>
   )
 }
