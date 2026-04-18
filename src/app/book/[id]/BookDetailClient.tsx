@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import { Highlight } from '@/lib/types'
 import { useDebounce } from '@/lib/hooks'
@@ -8,6 +8,17 @@ import HighlightCard from '@/components/HighlightCard'
 import SearchBar from '@/components/SearchBar'
 import ThemeToggle from '@/components/ThemeToggle'
 import { ArrowLeft } from 'lucide-react'
+
+function dedupeById(rows: Highlight[]): Highlight[] {
+  const seen = new Set<string>()
+  const out: Highlight[] = []
+  for (const r of rows) {
+    if (seen.has(r.id)) continue
+    seen.add(r.id)
+    out.push(r)
+  }
+  return out
+}
 
 const PAGE_SIZE = 50
 
@@ -33,8 +44,19 @@ export default function BookDetailClient({ book }: BookDetailClientProps) {
   const [searchInput, setSearchInput] = useState('')
   const searchQuery = useDebounce(searchInput, 300)
 
+  // Tracks the most-recently-issued request so stale responses (e.g. a
+  // Load-more whose reply lands after a search reset) are dropped instead
+  // of being merged into state.
+  const requestSeqRef = useRef(0)
+  const abortRef = useRef<AbortController | null>(null)
+
   const fetchPage = useCallback(
     async (nextOffset: number, q: string, append: boolean) => {
+      abortRef.current?.abort()
+      const controller = new AbortController()
+      abortRef.current = controller
+
+      const seq = ++requestSeqRef.current
       if (append) setLoadingMore(true)
       else setLoading(true)
       try {
@@ -44,20 +66,29 @@ export default function BookDetailClient({ book }: BookDetailClientProps) {
           offset: String(nextOffset),
         })
         if (q) params.set('search', q)
-        const res = await fetch(`/api/highlights?${params}`)
+        const res = await fetch(`/api/highlights?${params}`, {
+          signal: controller.signal,
+        })
         const data = await res.json()
+        if (seq !== requestSeqRef.current) return
         if (!data.success) throw new Error(data.error ?? 'Failed to load highlights')
 
         setTotal(data.total)
         setHasMore(data.hasMore)
         setOffset(nextOffset + data.highlights.length)
-        setHighlights((prev) => (append ? [...prev, ...data.highlights] : data.highlights))
+        setHighlights((prev) =>
+          dedupeById(append ? [...prev, ...data.highlights] : data.highlights),
+        )
       } catch (error) {
+        if ((error as Error).name === 'AbortError') return
+        if (seq !== requestSeqRef.current) return
         console.error('Error fetching highlights:', error)
         if (!append) setHighlights([])
       } finally {
-        setLoading(false)
-        setLoadingMore(false)
+        if (seq === requestSeqRef.current) {
+          setLoading(false)
+          setLoadingMore(false)
+        }
       }
     },
     [book.id],
@@ -68,7 +99,7 @@ export default function BookDetailClient({ book }: BookDetailClientProps) {
   }, [searchQuery, fetchPage])
 
   const loadMore = () => {
-    if (loadingMore || !hasMore) return
+    if (loadingMore || loading || !hasMore) return
     fetchPage(offset, searchQuery.trim(), true)
   }
 
