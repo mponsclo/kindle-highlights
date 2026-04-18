@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/lib/theme-context";
 import ErrorBoundary from "@/components/ErrorBoundary";
@@ -8,28 +8,33 @@ import SkipToContent from "@/components/SkipToContent";
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
-  display: 'swap',
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "Kindle Highlights Manager",
-  description: "Organize and manage your Kindle highlights with a beautiful, modern interface",
-  keywords: "kindle, highlights, reading, books, notes, organization",
+  description:
+    "A quiet home for your Kindle highlights. Upload clippings.txt, browse by book, and revisit what you've marked.",
+  keywords: "kindle, highlights, reading, books, notes, library",
   authors: [{ name: "Kindle Highlights Manager" }],
-  creator: "Kindle Highlights Manager",
-  publisher: "Kindle Highlights Manager",
   robots: "index, follow",
   openGraph: {
     title: "Kindle Highlights Manager",
-    description: "Organize and manage your Kindle highlights with a beautiful, modern interface",
+    description: "A quiet home for your Kindle highlights.",
     type: "website",
     locale: "en_US",
   },
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title: "Kindle Highlights Manager",
-    description: "Organize and manage your Kindle highlights with a beautiful, modern interface",
-  }
+    description: "A quiet home for your Kindle highlights.",
+  },
 };
 
 export default function RootLayout({
@@ -42,7 +47,8 @@ export default function RootLayout({
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#3b82f6" />
+        <meta name="theme-color" content="#FAFAF9" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#09090B" media="(prefers-color-scheme: dark)" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -60,13 +66,13 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body
+        className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased bg-[color:var(--bg)] text-[color:var(--fg)]`}
+      >
         <SkipToContent />
         <ErrorBoundary>
           <ThemeProvider>
-            <main id="main-content">
-              {children}
-            </main>
+            <main id="main-content">{children}</main>
           </ThemeProvider>
         </ErrorBoundary>
       </body>

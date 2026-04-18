@@ -1,7 +1,7 @@
 'use client'
 
 import React, { Component, ErrorInfo, ReactNode } from 'react'
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
+import { RefreshCw } from 'lucide-react'
 
 interface Props {
   children: ReactNode
@@ -25,11 +25,6 @@ export default class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('Error caught by boundary:', error, errorInfo)
-    
-    // In production, you'd send this to error reporting service
-    if (process.env.NODE_ENV === 'production') {
-      // logErrorToService(error, errorInfo)
-    }
   }
 
   handleReset = () => {
@@ -38,52 +33,45 @@ export default class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
-      if (this.props.fallback) {
-        return this.props.fallback
-      }
+      if (this.props.fallback) return this.props.fallback
 
       return (
-        <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex items-center justify-center p-4">
-          <div className="max-w-md w-full bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-gray-200 dark:border-slate-700 p-8 text-center">
-            <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-              <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
-            </div>
-            
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-              Something went wrong
+        <div className="min-h-screen bg-[color:var(--bg)] text-[color:var(--fg)] flex items-center justify-center p-6">
+          <div className="max-w-md w-full border border-[color:var(--border)] bg-[color:var(--surface)] p-8">
+            <p className="text-[10px] font-mono uppercase tracking-widest text-[color:var(--muted)]">
+              Error
+            </p>
+            <h2 className="mt-2 text-2xl font-semibold leading-tight">
+              Something went wrong.
             </h2>
-            
-            <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
-              We encountered an unexpected error. Don&apos;t worry, your data is safe.
-              You can try refreshing the page or go back to the home page.
+            <p className="mt-3 text-sm text-[color:var(--muted)] leading-relaxed">
+              Your data is safe. Try again, or head back to the start.
             </p>
 
             {process.env.NODE_ENV === 'development' && this.state.error && (
-              <details className="text-left bg-gray-100 dark:bg-slate-700 rounded-lg p-4 mb-6 text-sm">
-                <summary className="cursor-pointer font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Error Details (Development)
+              <details className="mt-5 border border-[color:var(--border)] bg-[color:var(--bg)] p-3 text-xs">
+                <summary className="cursor-pointer font-mono uppercase tracking-widest text-[color:var(--muted)]">
+                  Dev details
                 </summary>
-                <pre className="text-red-600 dark:text-red-400 overflow-auto">
+                <pre className="mt-2 overflow-auto text-[color:var(--fg)] font-mono">
                   {this.state.error.toString()}
                 </pre>
               </details>
             )}
-            
-            <div className="flex flex-col sm:flex-row gap-3">
+
+            <div className="mt-6 flex gap-3">
               <button
                 onClick={this.handleReset}
-                className="flex-1 flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl font-medium transition-colors"
+                className="inline-flex items-center gap-2 bg-[color:var(--fg)] text-[color:var(--bg)] px-4 py-2 text-sm hover:bg-[color:var(--accent-strong)] hover:text-[color:var(--fg)] transition-colors"
               >
-                <RefreshCw className="w-4 h-4" />
-                <span>Try Again</span>
+                <RefreshCw className="w-3.5 h-3.5" strokeWidth={1.5} />
+                Try again
               </button>
-              
               <button
-                onClick={() => window.location.href = '/'}
-                className="flex-1 flex items-center justify-center space-x-2 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-300 px-4 py-3 rounded-xl font-medium transition-colors"
+                onClick={() => (window.location.href = '/')}
+                className="inline-flex items-center gap-2 border border-[color:var(--border)] text-[color:var(--fg)] px-4 py-2 text-sm hover:bg-[color:var(--bg)] transition-colors"
               >
-                <Home className="w-4 h-4" />
-                <span>Go Home</span>
+                Go home
               </button>
             </div>
           </div>

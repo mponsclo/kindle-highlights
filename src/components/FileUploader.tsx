@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Upload, FileText, CheckCircle, AlertCircle } from 'lucide-react'
+import { Upload, FileText, CheckCircle2, AlertCircle } from 'lucide-react'
 
 interface FileUploaderProps {
   onUploadSuccess?: () => void
@@ -35,17 +35,14 @@ export default function FileUploader({ onUploadSuccess }: FileUploaderProps) {
   const [result, setResult] = useState<UploadResult | null>(null)
 
   const handleFileUpload = async (file: File) => {
-    // Client-side validation
     if (!file.name.endsWith('.txt')) {
       setResult({ error: 'Please upload a .txt file' })
       return
     }
-
-    if (file.size > 10 * 1024 * 1024) { // 10MB limit
-      setResult({ error: 'File size must be less than 10MB' })
+    if (file.size > 10 * 1024 * 1024) {
+      setResult({ error: 'File size must be less than 10 MB' })
       return
     }
-
     if (file.size === 0) {
       setResult({ error: 'File appears to be empty' })
       return
@@ -57,28 +54,20 @@ export default function FileUploader({ onUploadSuccess }: FileUploaderProps) {
     try {
       const formData = new FormData()
       formData.append('file', file)
-
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      })
-
+      const response = await fetch('/api/upload', { method: 'POST', body: formData })
       const data = await response.json()
 
       if (response.ok && data.success) {
         setResult(data)
         onUploadSuccess?.()
       } else {
-        setResult({ 
-          error: data.error || 'Upload failed',
-          code: data.code 
-        })
+        setResult({ error: data.error || 'Upload failed', code: data.code })
       }
     } catch (error) {
       console.error('Upload error:', error)
-      setResult({ 
-        error: 'Network error occurred. Please check your connection and try again.',
-        code: 'NETWORK_ERROR'
+      setResult({
+        error: 'Network error. Check your connection and try again.',
+        code: 'NETWORK_ERROR',
       })
     } finally {
       setUploading(false)
@@ -98,13 +87,14 @@ export default function FileUploader({ onUploadSuccess }: FileUploaderProps) {
   }
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <div
-        className={`group relative border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300 ${
+    <div className="w-full">
+      <label
+        htmlFor="file-upload"
+        className={`relative block cursor-pointer border border-dashed transition-colors ${
           dragOver
-            ? 'border-blue-400 bg-blue-50/80 dark:bg-blue-950/30 dark:border-blue-500 scale-105 shadow-lg shadow-blue-500/20'
-            : 'border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-gray-50/50 dark:hover:bg-slate-700/30'
-        } ${uploading ? 'pointer-events-none' : 'cursor-pointer'}`}
+            ? 'border-[color:var(--accent-strong)] bg-[color:var(--accent-tint)]'
+            : 'border-[color:var(--border-strong)] hover:bg-[color:var(--surface)]'
+        } ${uploading ? 'pointer-events-none opacity-70' : ''}`}
         onDrop={handleDrop}
         onDragOver={(e) => {
           e.preventDefault()
@@ -116,106 +106,88 @@ export default function FileUploader({ onUploadSuccess }: FileUploaderProps) {
           type="file"
           accept=".txt"
           onChange={handleFileSelect}
-          className="hidden"
+          className="sr-only"
           id="file-upload"
           disabled={uploading}
         />
-        
-        <label
-          htmlFor="file-upload"
-          className="cursor-pointer flex flex-col items-center space-y-4"
-        >
+
+        <div className="px-8 py-12 flex flex-col items-center text-center gap-3">
           {uploading ? (
             <>
-              <div className="relative">
-                <div className="animate-spin w-12 h-12 border-3 border-blue-500 border-t-transparent rounded-full" />
-                <div className="absolute inset-0 w-12 h-12 border-3 border-blue-200 dark:border-blue-800 rounded-full" />
-              </div>
-              <p className="text-blue-600 dark:text-blue-400 font-medium">Processing your file...</p>
+              <div className="w-8 h-8 border border-[color:var(--border-strong)] border-t-[color:var(--accent-strong)] rounded-full animate-spin" />
+              <p className="text-sm text-[color:var(--muted)] font-mono uppercase tracking-widest">
+                Parsing…
+              </p>
             </>
           ) : (
             <>
-              <div className="relative">
-                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-300 ${
-                  dragOver 
-                    ? 'bg-blue-500 shadow-lg shadow-blue-500/30' 
-                    : 'bg-gradient-to-br from-blue-500 to-indigo-500 group-hover:from-blue-600 group-hover:to-indigo-600 group-hover:scale-110'
-                }`}>
-                  <Upload className="w-8 h-8 text-white transition-transform duration-300 group-hover:scale-110" />
-                </div>
-                <div className="absolute inset-0 w-16 h-16 bg-blue-400 rounded-2xl opacity-0 group-hover:opacity-30 transition-all duration-300 blur-xl" />
+              <Upload className="w-6 h-6 text-[color:var(--fg)]" strokeWidth={1.5} />
+              <div className="text-sm">
+                <span className="text-[color:var(--fg)] underline underline-offset-4 decoration-[color:var(--accent-strong)] decoration-2">
+                  Choose a file
+                </span>
+                <span className="text-[color:var(--muted)]"> or drop it here</span>
               </div>
-              
-              <div className="text-center space-y-2">
-                <div className="text-lg">
-                  <span className="text-blue-600 dark:text-blue-400 font-semibold hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
-                    Choose your Kindle clippings file
-                  </span>
-                </div>
-                <p className="text-gray-500 dark:text-gray-400 text-sm">or drag and drop it here</p>
-                
-                <div className="flex items-center justify-center space-x-2 text-xs text-gray-400 dark:text-gray-500 pt-2">
-                  <FileText className="w-4 h-4" />
-                  <span>Only .txt files • Max 10MB</span>
-                </div>
+              <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest text-[color:var(--subtle)]">
+                <FileText className="w-3 h-3" strokeWidth={1.5} />
+                <span>.txt · max 10 MB</span>
               </div>
             </>
           )}
-        </label>
-      </div>
+        </div>
+      </label>
 
       {result && (
-        <div className="mt-6 animate-in fade-in duration-300">
+        <div className="mt-4 animate-in">
           {'error' in result ? (
-            <div className="flex items-start space-x-3 text-red-700 dark:text-red-400 bg-red-50/80 dark:bg-red-950/30 backdrop-blur-sm border border-red-200 dark:border-red-800/50 p-4 rounded-2xl">
-              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+            <div className="flex items-start gap-3 border border-[color:var(--border)] bg-[color:var(--surface)] px-4 py-3 text-sm">
+              <AlertCircle
+                className="w-4 h-4 mt-0.5 flex-shrink-0 text-[color:var(--fg)]"
+                strokeWidth={1.5}
+              />
               <div>
-                <p className="font-medium mb-1">Upload failed</p>
-                <p className="text-sm opacity-90">{result.error}</p>
+                <p className="font-medium text-[color:var(--fg)]">Upload failed</p>
+                <p className="text-[color:var(--muted)]">{result.error}</p>
               </div>
             </div>
           ) : (
-            <div className="bg-emerald-50/80 dark:bg-emerald-950/30 backdrop-blur-sm border border-emerald-200 dark:border-emerald-800/50 p-6 rounded-2xl">
-              <div className="flex items-center space-x-3 text-emerald-700 dark:text-emerald-400 mb-4">
-                <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center">
-                  <CheckCircle className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <p className="font-semibold text-lg">{result.message}</p>
-                  <p className="text-sm opacity-80">Your highlights are now ready to explore!</p>
-                </div>
+            <div className="border border-[color:var(--border)] bg-[color:var(--surface)]">
+              <div className="flex items-center gap-3 px-4 py-3 border-b border-[color:var(--border)]">
+                <CheckCircle2 className="w-4 h-4 text-[color:var(--accent-strong)]" strokeWidth={1.5} />
+                <p className="text-sm font-medium text-[color:var(--fg)]">{result.message}</p>
               </div>
-              
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div className="bg-white/60 dark:bg-slate-800/40 rounded-xl p-3">
-                  <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-                    {result.stats.totalHighlights}
-                  </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">
-                    Highlights
-                  </div>
-                </div>
-                <div className="bg-white/60 dark:bg-slate-800/40 rounded-xl p-3">
-                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                    {result.stats.newBooks}
-                  </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">
-                    New Books
-                  </div>
-                </div>
-                <div className="bg-white/60 dark:bg-slate-800/40 rounded-xl p-3">
-                  <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                    {result.stats.totalBooks}
-                  </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">
-                    Total Books
-                  </div>
-                </div>
-              </div>
+              <dl className="grid grid-cols-3 nums-tabular">
+                <Stat label="Highlights" value={result.stats.totalHighlights} />
+                <Stat label="New books" value={result.stats.newBooks} divider />
+                <Stat label="Total books" value={result.stats.totalBooks} divider />
+              </dl>
             </div>
           )}
         </div>
       )}
+    </div>
+  )
+}
+
+function Stat({
+  label,
+  value,
+  divider = false,
+}: {
+  label: string
+  value: number
+  divider?: boolean
+}) {
+  return (
+    <div
+      className={`px-4 py-3 ${
+        divider ? 'border-l border-[color:var(--border)]' : ''
+      }`}
+    >
+      <dt className="text-[10px] font-mono uppercase tracking-widest text-[color:var(--muted)]">
+        {label}
+      </dt>
+      <dd className="text-xl text-[color:var(--fg)] mt-0.5">{value.toLocaleString()}</dd>
     </div>
   )
 }
