@@ -1,5 +1,7 @@
 # Kindle Highlights Manager
 
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 A quiet home for your Kindle highlights. Drop a `My Clippings.txt` file on it
 and the app parses every highlight, groups them by book, and gives you a
 typographic reading interface — fast server-rendered pages, a real reading
