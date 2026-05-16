@@ -1,15 +1,21 @@
+<div align="center">
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="public/lockup-dark.svg">
-  <img src="public/lockup.svg" alt="Kindle Highlights" height="72">
+  <img src="public/lockup.svg" alt="Kindle Highlights" height="96">
 </picture>
+
+<br/>
+
+A quiet home for your Kindle highlights — parse, browse, and revisit everything you've underlined.
+
+<br/>
 
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-A quiet home for your Kindle highlights. Drop a `My Clippings.txt` file on it
-and the app parses every highlight, groups them by book, and gives you a
-typographic reading interface — fast server-rendered pages, a real reading
-measure, and an amber highlighter that marks every quote the way you'd
-underline a book by hand.
+</div>
+
+---
 
 ![Landing page in light mode](docs/screenshots/landing-light.png)
 
