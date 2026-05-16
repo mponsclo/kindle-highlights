@@ -1,4 +1,7 @@
-# Kindle Highlights Manager
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="public/lockup-dark.svg">
+  <img src="public/lockup.svg" alt="Kindle Highlights" height="72">
+</picture>
 
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 

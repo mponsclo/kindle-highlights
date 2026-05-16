@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 100" width="360" height="100" role="img" aria-label="Kindle Highlights">
+  <rect width="360" height="100" fill="#111111"></rect>
+  <g transform="translate(10 10) scale(0.8)">
+    <rect x="18" y="28" width="10" height="44" rx="5" fill="#FFFFFF"></rect>
+    <rect x="38" y="34" width="44" height="6" rx="3" fill="#FFFFFF"></rect>
+    <rect x="38" y="56" width="54" height="14" rx="7" fill="#FFFFFF"></rect>
+  </g>
+  <text x="108" y="44" font-family="Inter, -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, system-ui, sans-serif" font-size="14" font-weight="500" letter-spacing="2.5" fill="#999999">KINDLE</text>
+  <text x="108" y="78" font-family="Inter, -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, system-ui, sans-serif" font-size="34" font-weight="600" letter-spacing="-0.7" fill="#FFFFFF">highlights</text>
+</svg>
