@@ -24,6 +24,7 @@ export const metadata: Metadata = {
   keywords: "kindle, highlights, reading, books, notes, library",
   authors: [{ name: "Kindle Highlights Manager" }],
   robots: "index, follow",
+  icons: { icon: "/favicon.svg", apple: "/icon-app-tile.svg" },
   openGraph: {
     title: "Kindle Highlights Manager",
     description: "A quiet home for your Kindle highlights.",
